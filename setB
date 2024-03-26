@@ -1,0 +1,75 @@
+SET B
+create table branch(bid int primary key,brname varchar(20),brcity varchar(10));
+insert into branch values(101,'m.g road','Pune');
+insert into branch values(102,'r.g road','Mumbai');
+insert into branch values(103,'k.g road','Shrirampur');
+insert into branch values(104,'s.g road','Pune');
+select * from branch;
+
+create table customer(cno int primary key,cname varchar(20),caddr varchar(35),city varchar(20));
+insert into customer values(01,'Shreya','r.d street','Pune');
+insert into customer values(02,'Shruti','sion','Mumbai');
+insert into customer values(03,'Aditya','Shivaji road','Pune');
+insert into customer values(04,'Nikhil','Main road','Shrirampur');
+select * from customer;
+
+create table loan_application(lno int primary key,l_req money,l_appr money,l_date date);
+insert into loan_application values(10,200000,200000,'2005-10-12');
+insert into loan_application values(20,100000,100000,'2005-1-10');
+insert into loan_application values(30,300000,300000,'2005-11-2');
+insert into loan_application values(40,400000,200000,'2005-9-13');
+select * from loan_application;
+
+create table bcl(bid int references  branch,cno int references  customer,lno int references loan_application);
+insert into bcl values(101,02,30);
+insert into bcl values(102,01,10);
+insert into bcl values(103,03,20);
+insert into bcl values(104,04,40);
+select * from bcl;
+
+a) Write a function that returns the total number of customers of a particular branch.( Accept 
+branch name as input parameter.) 
+-->create or replace function cust_count(brname1 branch.brname%type) returns int as
+$$
+declare
+	a int;
+begin
+	select count(*) into a from branch,customer,bcl
+	where customer.cno=bcl.cno
+	and branch.bid=bcl.bid
+	and brname=brname1;
+	return a;
+end;
+$$
+language plpgsql;
+
+b) Write a function to find the maximum loan amount approved. 
+-->create or replace function max_lamtapp() returns money as
+$$
+declare
+	a money;
+begin
+	select max(l_appr) into a from loan_application;
+	return a;
+end;
+$$
+language plpgsql;
+
+c) Create a function which returns the total number of customers who have applied for a loan 
+more than Rs.100000. (Accept loan amount as input parameter) 
+-->create or replace function count_customer(lappr loan_application.l_appr%type)
+returns int as
+$$
+declare
+	a int;
+begin
+	select count(*) into a from customer,loan_application,bcl
+	where customer.cno=bcl.cno
+	and loan_application.lno=bcl.lno
+	and l_appr>lappr;
+	return a;
+end;
+$$
+language plpgsql;
+
+

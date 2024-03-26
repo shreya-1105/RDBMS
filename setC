@@ -1,0 +1,63 @@
+SET C
+create table student(sno int primary key,sname varchar(30),sclass varchar(10),saddr varchar(50));
+insert into student values(101,'om','fy','pune');
+insert into student values(102,'sai','fy','pune');
+insert into student values(103,'ram','sy','pune');
+select * from student;
+
+create table teacher(tno int primary key,tname  varchar(30),qualification varchar(10),experience int);
+insert into teacher values(01,'Mr.Joshi','BSC',3);
+insert into teacher values(02,'Mr.Nawale','PHD',5);
+insert into teacher values(03,'Mrs.Joshi','BCA',2);
+select * from teacher;
+
+create table st(sno int references student,tno int references teacher,subject varchar(20));
+insert into st values(101,01,'DS');
+insert into st values(102,02,'PHP');
+insert into st values(103,01,'RDBMS');
+insert into st values(104,03,'DBMS');
+
+select * from st;
+a) Write a function to find name of the most experienced teacher for “Mathematics”. 
+-->create or replace function disp_teacher(subject1 st.subject%type) returns varchar(20) as
+$$
+declare 
+	a varchar(20);
+begin
+  	select tname into a from teacher,st
+	where teacher.tno=st.tno
+	and experience=(select max(experience) from teacher)
+	and subject=subject1;
+return a;
+end;
+$$
+language plpgsql;
+
+b) Write a function to find the teacher teaching maximum number of subjects. 
+-->create or replace function disp_teach() returns varchar(20) as
+$$
+declare 
+	a varchar(20);
+begin
+  	select tname into a from teacher,st
+	where teacher.tno=st.tno
+	and subject=(select max(subject) from st);
+return a;
+end;
+$$
+language plpgsql;
+
+c) Write a function to find the number of teachers having qualification “Ph. D.”. 
+-->create or replace function disp_teach1() returns int as
+$$
+declare 
+	a int;
+begin
+  	select count(*) into a from teacher,st
+	where teacher.tno=st.tno
+	and qualification='PHD';
+return a;
+end;
+$$
+language plpgsql;
+

@@ -1,0 +1,90 @@
+SET D
+
+create table project(pno int primary key,pname char(20),ptype char(20),duration int);
+insert into project values(101,'admission process','Educational',20);
+insert into project values(102,'credit system','Banking',40);
+insert into project values(103,'apartment project','Construction',50);
+insert into project values(104,'debit system','Banking',10);
+select * from project;
+
+create table employee(eno int primary key,ename varchar(20),join_date date);
+insert into employee values(1,'om','2021-9-8');
+insert into employee values(2,'sai','2018-4-6');
+insert into employee values(3,'ram','2022-5-3');
+insert into employee values(4,'sham','2023-4-6');
+insert into employee values(5,'sita','2019-4-8');
+insert into employee values(6,'gita','2015-9-9');
+select * from employee;
+
+create table PE(pno int references project,eno int references employee,start_date date);
+insert into PE values(101,1,'2022-8-6');
+insert into PE values(102,2,'2021-6-8');
+insert into PE values(102,3,'2020-7-9');
+insert into PE values(103,4,'2022-11-12');
+insert into PE values(103,5,'2021-11-6');
+insert into PE values(104,5,'2020-10-8');
+insert into PE values(104,6,'2022-2-6');
+
+select * from PE;
+
+a. Write a stored function to accept project type as an input and display all project names of 
+that type.
+--->
+create or replace function fun(type project.ptype%type) returns void as
+$$
+declare
+	t_pname project.ptype%type;
+	c1 cursor for select pname from project
+	where ptype=type;
+ begin
+	open c1;
+	loop
+	fetch c1 into t_pname;
+	exit when not found;
+	raise notice 'Project name is=%',t_pname;
+	end loop;
+	close c1;
+end;
+$$
+language plpgsql;
+
+b. Write a function which accepts employee name and prints the details of the project which 
+the employee works on. 
+--->
+create or replace function fun22(name employee.ename%type) returns void as
+$$
+declare 
+	r1 project%rowtype;
+	c1 cursor for select project.*  from project,employee,PE
+		where project.pno=PE.pno and employee.eno=PE.eno
+		and ename=name;
+begin
+		open c1;
+		loop
+		fetch c1 into r1;
+		exit when not found;
+		raise notice 'Project no=%',r1.pno;
+		raise notice 'Project name=%',r1.pname;
+		raise notice 'Project type=%',r1.ptype;
+		raise notice 'Duration=%',r1.duration;
+		end loop;
+		close c1;
+end;
+$$
+language plpgsql;
+
+c. Write a function to accept project name as input and returns the number of employees 
+working on the project. 
+--->
+create or replace function fun3(name project.pname%type) returns int as
+$$
+declare
+cnt int;
+begin
+	select count(*) into cnt from employee,project,PE
+	where project.pno=PE.pno and employee.eno=PE.eno
+	and pname=name;
+  	return cnt;
+end;
+$$
+language plpgsql;

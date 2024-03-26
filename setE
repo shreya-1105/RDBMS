@@ -1,0 +1,77 @@
+SET E
+create table student(rno int primary key,sname varchar(20),address varchar(20),class varchar(20));
+
+insert into student values(101,'om', 'shrirampur','ty');
+insert into student values(102,'sai', 'shrirampur', 'ty');
+insert into student values(103,'ram', 'shrirampur', 'sy'); 
+
+create table subject(subcode int primary key,subname varchar(20)); 
+
+insert into subject values(401,'java');
+Insert into subject values(402,'php'); 
+Insert into subject values(403,'dbms'); 
+insert into subject values(404,'c'); 
+
+create table ss(rno int references student,subno int references subject,marks int, status varchar(20)); 
+
+insert into ss values(101,401,80, 'pass'); 
+insert into ss values(101,402,30,'fail');
+insert into ss values(102,403,55, 'pass');
+insert into ss values(102,404,75, 'pass');
+insert into ss values(103,401,25,'fail'); 
+select* from student;
+
+a..Write a function which will accept the roll no and print all thedetails of that student.
+-->create or replace function dispstud1(no student.rno%type) returns void as
+$$
+declare
+r1 student%rowtype;
+begin
+select * into r1 from student where rno=no;
+raise notice 'student roll  no:%',r1.rno;
+raise notice 'student Name:%',r1.sname;
+raise notice 'student Address:%',r1.address;
+raise notice 'student Class:%',r1.class;
+end;
+$$
+language plpgsql;
+
+b. Write a function to accept student name as input and displays details of that student. 
+-->create or replace function dispstud2(name student.sname%type) returns void as
+$$
+declare
+r1 student%rowtype;
+begin
+select * into r1 from student where sname=name;
+raise notice 'student roll  no:%',r1.rno;
+raise notice 'student Name:%',r1.sname;
+raise notice 'student Address:%',r1.address;
+raise notice 'student Class:%',r1.class;
+end;
+$$
+language plpgsql;
+
+c.Write a stored function using cursors, to accept class from the user and display the details of 
+the students of that class. 
+-->create or replace function dispstud3(sclass student.class%type)
+returns void as
+$$
+declare
+r1 student%rowtype;
+c1 cursor for   select *  from student where class=sclass;
+begin
+ 	open c1;
+	loop
+	fetch c1 into r1;
+	exit when not found;
+	raise notice 'student roll  no:%',r1.rno;
+raise notice 'student Name:%',r1.sname;
+raise notice 'student Address:%',r1.address;
+raise notice 'student Class:%',r1.class;
+	end loop;
+close c1;
+end;
+$$
+language plpgsql;
+
+
